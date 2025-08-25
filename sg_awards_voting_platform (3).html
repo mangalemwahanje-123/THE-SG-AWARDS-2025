@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SG Awards 2025 - MKU Mombasa</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: url('https://i.ibb.co/3C7Wr5T/horse-faint.png') no-repeat center center fixed;
+      background-size: cover;
+      background-blend-mode: lighten;
+    }
+    .overlay {
+      background-color: rgba(255, 255, 255, 0.9);
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body class="overlay flex flex-col">
+  <!-- Header -->
+  <header class="bg-yellow-700 text-white p-6 shadow-md">
+    <h1 class="text-3xl font-bold text-center">SG AWARDS 2025</h1>
+    <p class="text-center text-lg mt-2">Mount Kenya University – Mombasa Campus</p>
+    <p class="text-center italic text-sm mt-1">Committed to empower through celebrating achievements</p>
+  </header>
+
+  <!-- Awards Info -->
+  <section class="p-4 text-center">
+    <p class="text-lg font-medium">🏆 Various awards to be won including Certificates, Gift Hampers & Cash Prizes!</p>
+  </section>
+
+  <!-- Voting Section -->
+  <main id="votingSection" class="flex-1 p-4 md:p-6">
+    <h2 class="text-2xl font-bold text-center mb-6">Vote for Your Contenders</h2>
+    <div id="positionsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white text-center p-4 mt-6">
+    <p class="text-sm">SG Awards 2025 brought to you by <span class="font-semibold">Mangale Mwahanje Masoud</span> – Secretary General, MKU Mombasa Campus</p>
+  </footer>
+
+  <script>
+    // Demo Data (Editable by Admin later)
+    const positions = [
+      { title: 'Most Popular Student', contenders: ['Alice Wanjiru', 'Brian Otieno', 'Cynthia Mwende'] },
+      { title: 'Best Leadership Award', contenders: ['Daniel Mwangi', 'Esther Kamau'] },
+      { title: 'Creative Talent Award', contenders: ['Faith Njeri', 'George Kiptoo'] }
+    ];
+
+    // Track votes (localStorage for demo; can be replaced with tokens)
+    const votes = JSON.parse(localStorage.getItem('votes')) || {};
+
+    function getVoteCounts(posTitle) {
+      if (!votes[posTitle]) return {};
+      return votes[posTitle];
+    }
+
+    function renderPositions() {
+      const container = document.getElementById('positionsContainer');
+      container.innerHTML = '';
+
+      positions.forEach(pos => {
+        const section = document.createElement('div');
+        section.className = 'bg-white rounded-2xl shadow-lg p-6';
+
+        const title = document.createElement('h3');
+        title.className = 'text-xl font-bold mb-4 text-center text-yellow-700';
+        title.textContent = pos.title;
+        section.appendChild(title);
+
+        const counts = getVoteCounts(pos.title);
+        let totalVotes = 0;
+        Object.values(counts).forEach(c => totalVotes += c);
+
+        pos.contenders.forEach(name => {
+          const contenderDiv = document.createElement('div');
+          contenderDiv.className = 'mb-3';
+
+          const row = document.createElement('div');
+          row.className = 'flex justify-between items-center mb-1';
+
+          const span = document.createElement('span');
+          span.textContent = name;
+
+          const btn = document.createElement('button');
+          btn.textContent = 'Vote';
+          btn.className = 'bg-yellow-700 text-white px-6 py-2 rounded-lg hover:bg-yellow-800';
+
+          // Check if already voted for this position
+          const voted = localStorage.getItem('voted_' + pos.title);
+          if (voted) {
+            btn.textContent = (voted === name) ? 'Voted' : 'Vote';
+            btn.disabled = (voted === name);
+            if (btn.disabled) btn.className = 'bg-gray-400 text-white px-6 py-2 rounded-lg';
+          }
+
+          btn.onclick = () => {
+            if (localStorage.getItem('voted_' + pos.title)) {
+              alert('You already voted for ' + pos.title);
+              return;
+            }
+
+            if (!votes[pos.title]) votes[pos.title] = {};
+            if (!votes[pos.title][name]) votes[pos.title][name] = 0;
+            votes[pos.title][name]++;
+
+            localStorage.setItem('votes', JSON.stringify(votes));
+            localStorage.setItem('voted_' + pos.title, name);
+
+            renderPositions();
+          };
+
+          row.appendChild(span);
+          row.appendChild(btn);
+          contenderDiv.appendChild(row);
+
+          // Progress bar
+          const barContainer = document.createElement('div');
+          barContainer.className = 'w-full bg-gray-200 rounded-full h-4';
+          const bar = document.createElement('div');
+          const count = votes[pos.title]?.[name] || 0;
+          const percent = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+          bar.style.width = percent + '%';
+          bar.className = 'bg-yellow-700 h-4 rounded-full';
+          barContainer.appendChild(bar);
+
+          const label = document.createElement('p');
+          label.className = 'text-sm text-gray-600 mt-1';
+          label.textContent = count + ' votes (' + percent + '%)';
+
+          contenderDiv.appendChild(barContainer);
+          contenderDiv.appendChild(label);
+
+          section.appendChild(contenderDiv);
+        });
+
+        container.appendChild(section);
+      });
+    }
+
+    renderPositions();
+  </script>
+</body>
+</html>
